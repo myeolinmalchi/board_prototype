@@ -37,8 +37,8 @@ __관리자 계정 생성__
 
 ###### 422 Unprocessable Entity
 입력된 정보가 유효하지 않음.
+- response body
 ```json
-/* response body */
 {
   "msg": "유효성 검사 결과 메세지"
 }
@@ -87,8 +87,8 @@ __관리자 계정 정보 수정__
 
 ###### 422 Unprocessable Entity
 입력된 정보가 유효하지 않음.
+- response body: 
 ```json
-// response body
 {
   "msg": "유효성 검사 결과 메세지"
 }
@@ -96,8 +96,8 @@ __관리자 계정 정보 수정__
 
 ###### 400 Bad Request
 올바르지 않은 요청
+ - response body: 
 ```json
-//response body
 {
   "msg": "에러 메세지"
 }
@@ -133,15 +133,12 @@ __관리자 계정 로그인__
 
 로그인이 정상적으로 수행됨.
 
+- response header: 
 ```json
-//response header
 {
-  ...,
-  "Authorization": "관리자 권한 인가를 위한 JWT",
-  ...
+  "Authorization": "관리자 권한 인가를 위한 JWT"
 }
 ```
-
 
 ###### 401 Unauthorized
 
@@ -181,33 +178,36 @@ __게시판의 게시글을 불러온다.__
 ##### Response Body:  
 
 ```json
-[
-  {
-    "board_id": 1,
-    "post_id": 1,
-    "title": "게시글 제목",
-    "thumbnail": "게시글 썸네일(base64)",
-    "content": "게시글 내용",
-    "sequence": 1
-  },
-  {
-    "board_id": 1,
-    "post_id": 2,
-    "title": "게시글 제목",
-    "thumbnail": "게시글 썸네일(base64)",
-    "content": "게시글 내용",
-    "sequence": 2
-  },
-  {
-    "board_id": 1,
-    "post_id": 3,
-    "title": "게시글 제목",
-    "thumbnail": "게시글 썸네일(base64)",
-    "content": "게시글 내용",
-    "sequence": 3
-  }, 
-  ...
-]
+{
+  "now_page": "현재 페이지 번호",
+  "page_count": "전체 페이지 수",
+  "posts": [
+    {
+      "board_id": 1,
+      "post_id": 1,
+      "title": "게시글 제목",
+      "thumbnail": "게시글 썸네일(base64)",
+      "content": "게시글 내용",
+      "sequence": 1
+    },
+    {
+      "board_id": 1,
+      "post_id": 2,
+      "title": "게시글 제목",
+      "thumbnail": "게시글 썸네일(base64)",
+      "content": "게시글 내용",
+      "sequence": 2
+    },
+    {
+      "board_id": 1,
+      "post_id": 3,
+      "title": "게시글 제목",
+      "thumbnail": "게시글 썸네일(base64)",
+      "content": "게시글 내용",
+      "sequence": 3
+    }
+  ]
+}
 ```
 <br>
 
@@ -233,8 +233,7 @@ __게시판에 게시글을 작성한다.__
     "이미지(base64)",
     "이미지(base64)",
     "이미지(base64)",
-    "이미지(base64)",
-    ...
+    "이미지(base64)"
   ]
 }
 ```
@@ -249,8 +248,8 @@ __게시판에 게시글을 작성한다.__
 
 ###### 422 Unprocessable Entity
 입력된 정보가 유효하지 않음.
+ - response body: 
 ```json
-// response body
 {
   "msg": "유효성 검사 결과 메세지"
 }
@@ -258,8 +257,8 @@ __게시판에 게시글을 작성한다.__
 
 ###### 400 Bad Request
 올바르지 않은 요청
+- response body: 
 ```json
-//response body
 {
   "msg": "에러 메세지"
 }
