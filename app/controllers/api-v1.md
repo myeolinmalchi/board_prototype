@@ -263,3 +263,72 @@ __게시판에 게시글을 작성한다.__
   "msg": "에러 메세지"
 }
 ```
+
+## POST
+
+### `api/v1/post/{post_id}`
+
+#### GET
+
+__게시글의 정보를 불러온다.__
+
+##### Request Header:
+```json
+{
+  "Content-Type": "application/json",
+  "Data-Type": "json"
+}
+```
+
+##### Response Body: 
+```json
+{
+  "post_id": 12345,
+  "board_id": 12345,
+  "title": "게시글 제목",
+  "thumbnail": "게시글 썸네일(base64)",
+  "content": "게시글 내용",
+  "sequence": 12345,
+  "images": [
+    {
+      "post_image_id": 1,
+      "image": "이미지(base64)",
+      "sequence": 1
+    },
+    {
+      "post_image_id": 2,
+      "image": "이미지(base64)",
+      "sequence": 2
+    },
+    {
+      "post_image_id": 3,
+      "image": "이미지(base64)",
+      "sequence": 3
+    }
+  ]
+}
+```
+
+---
+
+### `api/v1/post/{post_id}/thumbnail`
+
+#### GET
+__게시글의 썸네일을 불러온다.__
+
+##### Request Header:
+```json
+{
+  "Content-Type": "application/json",
+  "Data-Type": "json"
+}
+```
+
+##### Response Body: 
+```json
+{
+  "post_id": 12345,
+  "board_id": 12345,
+  "thumbnail": "게시글 썸네일(base64)"
+}
+```
