@@ -1,7 +1,5 @@
 ## Admin Account
 
----
-
 ### `api/v1/admin`
 
 #### POST
@@ -40,7 +38,7 @@ __관리자 계정 생성__
 ###### 422 Unprocessable Entity
 입력된 정보가 유효하지 않음.
 ```json
-// response body
+/* response body */
 {
   "msg": "유효성 검사 결과 메세지"
 }
