@@ -159,8 +159,6 @@ __관리자 계정 로그인__
 
 ## Board
 
----
-
 ### `api/v1/board/{board_id}`
 
 #### GET
