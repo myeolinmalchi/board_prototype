@@ -20,7 +20,7 @@ trait PostModel {
 				  keyword: Option[String],
 				  boardId: Option[Int]): Future[Int]
 	
-	def selectThumbnails(boardId: Option[Int]): Future[List[ThumbnailDTO]]
+	def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]]
 	def delete(postId: Int): Future[Int]
 	def update(postDTO: PostRequestDTO): Future[Int]
 	

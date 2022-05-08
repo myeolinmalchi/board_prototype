@@ -52,6 +52,6 @@ class PostServiceImpl @Inject() ()(implicit ex: ExecutionContext, postModel: Pos
 	
 	
 	override def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]] =
-		postModel selectThumbnails boardId
+		postModel selectThumbnails (size, boardId)
 	
 }
