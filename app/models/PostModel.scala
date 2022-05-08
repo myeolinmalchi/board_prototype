@@ -9,11 +9,18 @@ trait PostModel {
 
 	def insert(postDto: PostRequestDTO): Future[Int]
 	def select(postId: Int): Future[Option[PostDTO]]
-	def selectWithPagination(boardId: Int, size: Int, page: Int): Future[List[PostDTO]]
-	def searchWithPagination(boardId: Int, size: Int, page: Int, keyword: String): Future[List[PostDTO]]
-	def selectWithPaginationInAllBoard(size: Int, page: Int): Future[List[PostDTO]]
-	def searchWithPaginationInAllBoard(size: Int, page: Int, keyword: String): Future[List[PostDTO]]
-	def selectThumbnails(boardId: Int): Future[List[ThumbnailDTO]]
+	
+	def selectPosts(size: Int,
+					page: Int,
+					keyword: Option[String],
+					boardId: Option[Int]): Future[List[PostDTO]]
+	
+	def postCount(size: Int,
+				  page: Int,
+				  keyword: Option[String],
+				  boardId: Option[Int]): Future[Int]
+	
+	def selectThumbnails(boardId: Option[Int]): Future[List[ThumbnailDTO]]
 	def delete(postId: Int): Future[Int]
 	def update(postDTO: PostRequestDTO): Future[Int]
 	

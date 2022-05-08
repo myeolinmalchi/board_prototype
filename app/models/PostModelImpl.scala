@@ -2,7 +2,7 @@ package models
 
 import cats.data.OptionT
 import dto.{PostDTO, PostImageDTO, PostRequestDTO, ThumbnailDTO}
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import models.Tables.{PostImages, PostImagesRow, Posts, PostsRow}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import scala.concurrent.{ExecutionContext, Future}
@@ -10,6 +10,7 @@ import slick.dbio.{DBIO, DBIOAction, Effect, NoStream}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
 
+@Singleton
 class PostModelImpl @Inject() (val dbConfigProvider: DatabaseConfigProvider)
 							  (implicit ec: ExecutionContext)
 		extends HasDatabaseConfigProvider[JdbcProfile] with PostModel {
@@ -52,45 +53,29 @@ class PostModelImpl @Inject() (val dbConfigProvider: DatabaseConfigProvider)
 		} yield postWithImagesOption
 	}
 	
-	override def selectWithPagination(boardId: Int, size: Int, page: Int): Future[List[PostDTO]] = db run {
+	private val postsQuery = (size: Int,
+							  page: Int,
+							  keyword: Option[String],
+							  boardId: Option[Int]) =>
+		Posts.filter(_.boardId === boardId)
+				.filter(_.title like s"%$keyword%")
+				.drop((page - 1) * size)
+				.take(size)
+				
+	override def selectPosts(size: Int, page: Int, keyword: Option[String], boardId: Option[Int]) : Future[List[PostDTO]] = db run  {
 		for {
-			posts <- Posts.filter(_.boardId === boardId)
-					.drop((page-1)*size)
-					.take(size)
-					.result
+			posts <- postsQuery(size, page, keyword, boardId).result
 		} yield (posts map PostDTO.rowToDto).toList
 	}
 	
-	override def searchWithPagination(boardId: Int, size: Int, page: Int, keyword: String): Future[List[PostDTO]] = db run {
-		for {
-			posts <- Posts
-					.filter(post => (post.boardId === boardId) && (post.title like s"%${keyword}%"))
-					.drop((page-1)*size)
-					.take(size)
-					.result
-		} yield (posts map PostDTO.rowToDto).toList
-	}
+	override def postCount(size: Int,
+						   page: Int,
+						   keyword: Option[String],
+						   boardId: Option[Int]): Future[Int] =
+		db run postsQuery(size, page, keyword, boardId).size.result
 	
-	override def selectWithPaginationInAllBoard(size: Int, page: Int): Future[List[PostDTO]] = db run {
-		for {
-			posts <- Posts
-					.drop((page-1)*size)
-					.take(size)
-					.result
-		} yield (posts map PostDTO.rowToDto).toList
-	}
 	
-	override def searchWithPaginationInAllBoard(size: Int, page: Int, keyword: String): Future[List[PostDTO]] = db run {
-		for {
-			posts <- Posts
-					.filter(_.title like s"%${keyword}%")
-					.drop((page-1)*size)
-					.take(size)
-					.result
-		} yield (posts map PostDTO.rowToDto).toList
-	}
-	
-	override def selectThumbnails(boardId: Int): Future[List[ThumbnailDTO]] = db run {
+	override def selectThumbnails(boardId: Option[Int]): Future[List[ThumbnailDTO]] = db run {
 		for {
 			posts <- Posts.filter(_.boardId === boardId).result
 		} yield (posts map ThumbnailDTO.rowToDto).toList
@@ -100,4 +85,5 @@ class PostModelImpl @Inject() (val dbConfigProvider: DatabaseConfigProvider)
 		db run Posts.filter(_.postId === postId).delete
 	
 	override def update(postDTO: PostRequestDTO): Future[Int] = ???
+	
 }
