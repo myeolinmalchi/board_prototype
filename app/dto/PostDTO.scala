@@ -16,6 +16,10 @@ case class PostDTO(postId: Int,
 		
 }
 
+case class PostResponseDTO(nowPage: Int,
+						   pageCount: Int,
+						   posts: List[PostDTO])
+
 case class PostImageDTO(postId: Int,
 						postImageId: Int,
 						image: String,
@@ -37,7 +41,6 @@ object PostImageDTO {
 	implicit val imageReads = Json.reads[PostImageDTO]
 	implicit val rowToDto = (row: PostImagesRow) =>
 		PostImageDTO(row.postId, row.postId, row.image, row.sequence)
-	
 }
 object PostDTO {
 	implicit val postWrites = Json.writes[PostDTO]
@@ -51,6 +54,9 @@ object PostDTO {
 				row.content,
 				row.sequence
 			)
+}
+object PostResponseDTO {
+	implicit val responseWrites = Json.writes[PostResponseDTO]
 }
 object PostRequestDTO {
 	implicit val postRequestWrites = Json.writes[PostRequestDTO]
