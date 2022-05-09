@@ -43,7 +43,7 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 					PostImagesRow(postId, 0, image, index + 1)
 			}
 		} yield aff.getOrElse(0)
-	}
+	}.transactionally
 	
 	override def select(postId: Int): Future[Option[PostDTO]] = db run {
 		for {
@@ -95,6 +95,30 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 	override def delete(postId: Int): Future[Int] =
 		db run Posts.filter(_.postId === postId).delete
 	
-	override def update(postDTO: PostRequestDTO): Future[Int] = ???
+	override def update(post: PostRequestDTO): Future[Int] = db run {
+		for {
+			aff1 <- Posts
+				.map(p => (p.boardId, p.title, p.content, p.thumbnail))
+				.update((post.boardId, post.title, post.content, post.thumbnail))
+			aff2 <- PostImages
+				.filter(_.postId === post.postId)
+				.delete
+			aff3 <- PostImages ++= post.images.zipWithIndex.map {
+				case (image, index) =>
+					PostImagesRow(
+						postId = post.postId.getOrElse(throw new Exception("postId가 비어있습니다.")),
+						postImageId = 0,
+						image = image,
+						sequence = index + 1
+					)
+			}
+		} yield aff1 + aff2 + aff3.getOrElse(0)
+	}.transactionally
+	
+	override def checkPostExists(postId: Int): Future[Boolean] = db run {
+		for {
+			postOption <- Posts.filter(_.postId === postId).result.headOption
+		} yield postOption.isDefined
+	}
 	
 }

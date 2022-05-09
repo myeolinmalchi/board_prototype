@@ -27,4 +27,6 @@ trait PostModel {
 	
 	def update(postDTO: PostRequestDTO): Future[Int]
 	
+	def checkPostExists(postId: Int): Future[Boolean]
+	
 }
