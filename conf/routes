@@ -5,8 +5,16 @@
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
+
+# Routse for Admin Account
+POST    /api/v1/admin/login         controllers.AdminController.login
+POST    /api/v1/admin               controllers.AdminController.regist
+
+# Routes for Post
 GET     /api/v1/post                controllers.PostController.getPosts(size: Option[Int], page: Option[Int], keyword: Option[String], boardId: Option[Int])
 POST    /api/v1/post                controllers.PostController.addPost()
 GET     /api/v1/post/:postId        controllers.PostController.getPost(postId: Int)
 PUT     /api/v1/post/:postId        controllers.PostController.updatePost(postId: Int)
+POST    /api/v1/post/:postId/seq-add    controllers.PostController.addSequence(postId: Int)
+POST    /api/v1/post/:postId/seq-sub    controllers.PostController.subSequence(postId: Int)
 GET     /api/v1/thumbnail           controllers.PostController.getThumbnails(size: Option[Int], boardId: Option[Int])
