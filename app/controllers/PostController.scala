@@ -6,48 +6,45 @@ import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
 import scala.concurrent.ExecutionContext
-import services.PostService
+import services.{AuthService, PostService}
 import services.PostService._
 
 class PostController @Inject()(cc: ControllerComponents,
-                               postService: PostService)
+                               postService: PostService,
+                               authService: AuthService)
                               (implicit ec: ExecutionContext)
 	extends AbstractController(cc) {
 	
+	import authService.withAuth
+	
 	private val TITLE_TOO_LARGE_JSON_MSG = (length: Int) =>
-		Json.parse(
-			s"""
-				 |{
-				 |  "type": "title",
-				 |  "length": $length,
-				 |  "max": $TITLE_MAX_LENGTH
-				 |}
-				 |""".stripMargin)
+		Json.obj(
+			"type" -> "title",
+			"length" -> length,
+			"max" -> TITLE_MAX_LENGTH
+		)
 	
 	private val CONTENT_TOO_LARGE_JSON_MSG = (length: Int) =>
-		Json.parse(
-			s"""
-				 |{
-				 |  "type": "title",
-				 |  "length": $length,
-				 |  "max": $TITLE_MAX_LENGTH
-				 |}
-				 |""".stripMargin)
+		Json.obj(
+			"type" -> "content",
+			"length" -> length,
+			"max" -> CONTENT_MAX_LENGTH
+		)
 	
-	
-	// TODO: Authorization
 	def addPost(): Action[AnyContent] = Action.async { implicit request =>
-		withJson[PostRequestDTO] { post =>
-			postService addPost post map {
-				case Right(aff) if aff == post.images.size => Ok
-				case Left(ContentTooLarge(length)) =>
-					UnprocessableEntity(CONTENT_TOO_LARGE_JSON_MSG(length))
-				case Left(TitleTooLarge(length)) =>
-					UnprocessableEntity(TITLE_TOO_LARGE_JSON_MSG(length))
-				case _ => BadRequest
-			} recover {
-				case ex: Exception =>
-					BadRequest(Json.toJson(Map("msg" -> ex.getMessage)))
+		withAuth {
+			withJson[PostRequestDTO] { post =>
+				postService addPost post map {
+					case Right(aff) if aff == post.images.size => Ok
+					case Left(ContentTooLarge(length)) =>
+						UnprocessableEntity(CONTENT_TOO_LARGE_JSON_MSG(length))
+					case Left(TitleTooLarge(length)) =>
+						UnprocessableEntity(TITLE_TOO_LARGE_JSON_MSG(length))
+					case _ => BadRequest
+				} recover {
+					case ex: Exception =>
+						BadRequest(Json.obj("msg" -> ex.getMessage))
+				}
 			}
 		}
 	}
@@ -58,7 +55,7 @@ class PostController @Inject()(cc: ControllerComponents,
 			case None => NotFound
 		} recover {
 			case ex: Exception =>
-				BadRequest(Json.toJson(Map("msg" -> ex.getMessage)))
+				BadRequest(Json.obj("msg" -> ex.getMessage))
 		}
 	}
 	
@@ -75,7 +72,7 @@ class PostController @Inject()(cc: ControllerComponents,
 			Ok(Json.toJson(post))
 		} recover {
 			case ex: Exception =>
-				BadRequest(Json.toJson(Map("msg" -> ex.getMessage)))
+				BadRequest(Json.obj("msg" -> ex.getMessage))
 		}
 	}
 	
@@ -86,20 +83,47 @@ class PostController @Inject()(cc: ControllerComponents,
 	}
 	
 	def updatePost(postId: Int): Action[AnyContent] = Action.async { implicit request =>
-		withJson[PostRequestDTO] { post =>
-			postService updatePost post.setPostId(postId) map {
-				case Right(_) => Ok
-				case Left(ContentTooLarge(length)) =>
-					UnprocessableEntity(CONTENT_TOO_LARGE_JSON_MSG(length))
-				case Left(TitleTooLarge(length)) =>
-					UnprocessableEntity(TITLE_TOO_LARGE_JSON_MSG(length))
-				case Left(EmptyPostId) =>
-					BadRequest(Json.toJson(Map("msg" -> "postId가 비어있습니다.")))
-				case Left(PostNotExist) => NotFound
-			} recover {
-				case ex: Exception =>
-					BadRequest(Json.toJson(Map("msg" -> ex.getMessage)))
+		withAuth {
+			withJson[PostRequestDTO] { post =>
+				postService updatePost post.setPostId(postId) map {
+					case Right(_) => Ok
+					case Left(ContentTooLarge(length)) =>
+						UnprocessableEntity(CONTENT_TOO_LARGE_JSON_MSG(length))
+					case Left(TitleTooLarge(length)) =>
+						UnprocessableEntity(TITLE_TOO_LARGE_JSON_MSG(length))
+					case Left(EmptyPostId) =>
+						BadRequest(Json.obj("msg" -> "postId가 비어있습니다."))
+					case Left(PostNotExist) => NotFound
+				} recover {
+					case ex: Exception =>
+						BadRequest(Json.obj("msg" -> ex.getMessage))
+				}
 			}
 		}
 	}
+	
+	def addSequence(postId: Int): Action[AnyContent] = Action.async { implicit request =>
+		withAuth {
+			postService addSequence postId map {
+				case Some(_) => Ok
+				case None => NotFound
+			} recover {
+				case ex: Exception =>
+					BadRequest(Json.obj("msg" -> ex.getMessage))
+			}
+		}
+	}
+	
+	def subSequence(postId: Int): Action[AnyContent] = Action.async { implicit request =>
+		withAuth {
+			postService subSequence postId map {
+				case Some(_) => Ok
+				case None => NotFound
+			} recover {
+				case ex: Exception =>
+					BadRequest(Json.obj("msg" -> ex.getMessage))
+			}
+		}
+	}
+	
 }

@@ -27,6 +27,11 @@ trait PostModel {
 	
 	def update(postDTO: PostRequestDTO): Future[Int]
 	
+	def addSequence(postId: Int): Future[Option[Int]]
+	
+	def subSequence(postId: Int): Future[Option[Int]]
+	
 	def checkPostExists(postId: Int): Future[Boolean]
+	
 	
 }

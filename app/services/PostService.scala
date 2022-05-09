@@ -20,6 +20,11 @@ trait PostService extends ValidationResultLib[Future] {
 	def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]]
 	
 	def updatePost(post: PostRequestDTO): Future[Either[PostFailure, Int]]
+	
+	def addSequence(postId: Int): Future[Option[Int]]
+	
+	def subSequence(postId: Int): Future[Option[Int]]
+	
 }
 
 object PostService {

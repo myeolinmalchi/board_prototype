@@ -23,15 +23,15 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 				post.content.length <= CONTENT_MAX_LENGTH,
 				onFailure = ContentTooLarge(post.content.length)
 			)
-			
+		
 		private def checkPostIdEmpty: ValidationResult[PostFailure, Unit] =
 			ValidationResult.ensure(
 				post.postId.isDefined,
 				onFailure = EmptyPostId
 			)
-			
+		
 		private def checkPostExists: ValidationResult[PostFailure, Unit] =
-			ValidationResult.ensureM (
+			ValidationResult.ensureM(
 				postModel checkPostExists post.postId.getOrElse(0),
 				onFailure = PostNotExist
 			)
@@ -40,7 +40,7 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 			(for {
 				_ <- checkTitleLength
 				_ <- checkContentLength
-			}yield ()) onSuccess(postModel insert post)
+			} yield ()) onSuccess (postModel insert post)
 		
 		def validationForUpdating: Future[Either[PostFailure, Int]] =
 			(for {
@@ -48,7 +48,7 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 				_ <- checkPostExists
 				_ <- checkTitleLength
 				_ <- checkContentLength
-			}	yield ()) onSuccess (postModel update post)
+			} yield ()) onSuccess (postModel update post)
 	}
 	
 	override def addPost(post: PostRequestDTO): Future[Either[PostService.PostFailure, Int]] =
@@ -64,12 +64,19 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 		for {
 			posts <- postModel selectPosts(size, page, keyword, boardId)
 			count <- postModel postCount(size, page, keyword, boardId)
-		} yield PostResponseDTO(page, count, posts)
+		} yield PostResponseDTO(page, count / size + 1, posts)
 	
 	override def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]] =
 		postModel selectThumbnails(size, boardId)
 	
 	override def updatePost(post: PostRequestDTO): Future[Either[PostFailure, Int]] =
 		post.validationForUpdating
+	
+	override def addSequence(postId: Int): Future[Option[Int]] =
+		postModel addSequence postId
+	
+	override def subSequence(postId: Int): Future[Option[Int]] =
+		postModel subSequence postId
+	
 	
 }
