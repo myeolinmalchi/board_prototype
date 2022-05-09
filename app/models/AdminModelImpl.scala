@@ -25,7 +25,7 @@ class AdminModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 	override def select(id: String): Future[Option[AdminDTO]] = db run {
 		for {
 			adminOption <- Admin.filter(_.id === id).result.headOption
-		} yield adminOption map (AdminDTO.rowToDto)
+		} yield adminOption map AdminDTO.rowToDto
 	}
 	
 	override def selectPassword(id: String): Future[Option[String]] =
@@ -33,6 +33,28 @@ class AdminModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 	
 	override def delete(id: String): Future[Int] =
 		db run Admin.filter(_.id === id).delete
+	
+	override def checkAccountExists(id: String): Future[Boolean] = db run {
+		for {
+			idOption <- Admin.withFilter(_.id === id).result.headOption
+		} yield idOption.isDefined
+	}
+	
+	def checkNotExists(f: Admin => Rep[Boolean]): Future[Boolean] = db run {
+		for {
+			option <- Admin.withFilter(f).result.headOption
+		} yield option.isEmpty
+	}
+	
+	override def checkIdNotExists(id: String): Future[Boolean] =
+		checkNotExists(_.id === id)
+	
+	override def checkEmailNotExists(email: String): Future[Boolean] =
+		checkNotExists(a => a.email.getOrElse("") === email)
+	
+	override def checkPhoneNotExists(phone: String): Future[Boolean] =
+		checkNotExists(a => a.phone.getOrElse("") === phone)
+		
 	
 	override def update(admin: AdminDTO): Future[Int] = ???
 }
