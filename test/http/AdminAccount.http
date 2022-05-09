@@ -1,0 +1,21 @@
+### 로그인
+POST http://localhost:9000/api/v1/admin/login
+Content-Type: application/json
+
+{
+  "id": "minsuk4820",
+  "pw": "asd3254820"
+}
+
+### 회원가입
+POST http://localhost:9000/api/v1/admin
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTIxOTQ4MjcsImlhdCI6MTY1MjEwODQyNywNCiAJImlkIjogIm1pbnN1azQ4MjAiLA0KCSJyb2xlIjogImFkbWluIg0KIH0.m4Se8PLjC8p5eHqIDk3CzK_70cfoL0903-9pyWJrmRM
+
+{
+  "id": "minsuk4820",
+  "pw": "asd3254820",
+  "name": "강민석",
+  "email": "minsuk4820@gmail.com",
+  "phone": "010-2274-3820"
+}

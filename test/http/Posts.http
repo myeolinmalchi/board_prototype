@@ -1,0 +1,55 @@
+### 게시글 여러개 불러오기
+GET http://localhost:9000/api/v1/post?keyword=test&size=1&page=2
+Content-Type: application/json
+
+### 게시글 작성
+POST http://localhost:9000/api/v1/post
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTIxOTQ4MjcsImlhdCI6MTY1MjEwODQyNywNCiAJImlkIjogIm1pbnN1azQ4MjAiLA0KCSJyb2xlIjogImFkbWluIg0KIH0.m4Se8PLjC8p5eHqIDk3CzK_70cfoL0903-9pyWJrmRM
+
+{
+  "boardId": 1,
+  "title": "testTitle",
+  "content": "testContent",
+  "thumbnail": "testThumbnail",
+  "images": [
+    "image1",
+    "image2",
+    "image3"
+  ]
+}
+
+### 단일 게시물 불러오기
+GET http://localhost:9000/api/v1/post/1
+Content-Type: application/json
+
+### 게시글 수정하기
+PUT http://localhost:9000/api/v1/post/1
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTIxOTQ4MjcsImlhdCI6MTY1MjEwODQyNywNCiAJImlkIjogIm1pbnN1azQ4MjAiLA0KCSJyb2xlIjogImFkbWluIg0KIH0.m4Se8PLjC8p5eHqIDk3CzK_70cfoL0903-9pyWJrmRM
+
+{
+  "boardId": 1,
+  "title": "titleUpdateTest3",
+  "content": "contentUpdateTest3",
+  "thumbnail": "testThumbnail3",
+  "images": [
+    "image1",
+    "image2",
+    "image3"
+  ]
+}
+
+### 썸네일 불러오기
+GET http://localhost:9000/api/v1/thumbnail?size=1
+Content-Type: application/json
+
+### 게시글 seq 중가
+POST http://localhost:9000/api/v1/post/2/seq-add
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTIxOTQ4MjcsImlhdCI6MTY1MjEwODQyNywNCiAJImlkIjogIm1pbnN1azQ4MjAiLA0KCSJyb2xlIjogImFkbWluIg0KIH0.m4Se8PLjC8p5eHqIDk3CzK_70cfoL0903-9pyWJrmRM
+
+### 게시글 seq 감소
+POST http://localhost:9000/api/v1/post/2/seq-sub
+Content-Type: application/json
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2NTIxOTQ4MjcsImlhdCI6MTY1MjEwODQyNywNCiAJImlkIjogIm1pbnN1azQ4MjAiLA0KCSJyb2xlIjogImFkbWluIg0KIH0.m4Se8PLjC8p5eHqIDk3CzK_70cfoL0903-9pyWJrmRM
