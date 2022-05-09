@@ -183,32 +183,35 @@ __여러 게시물의 정보를 불러온다. (이미지 제외, 썸네일 포�
 
 ```json
 {
-  "now_page": "현재 페이지 번호",
-  "page_count": "전체 페이지 수",
+  "nowPage": "현재 페이지 번호",
+  "pageCount": "전체 페이지 수",
   "posts": [
     {
-      "board_id": 1,
-      "post_id": 1,
+      "boardId": 1,
+      "postId": 1,
       "title": "게시글 제목",
       "thumbnail": "게시글 썸네일(base64)",
       "content": "게시글 내용",
-      "sequence": 1
+      "sequence": 1,
+      "addedDate": 1652086339000
     },
     {
-      "board_id": 1,
-      "post_id": 2,
+      "boardId": 1,
+      "postId": 2,
       "title": "게시글 제목",
       "thumbnail": "게시글 썸네일(base64)",
       "content": "게시글 내용",
-      "sequence": 2
+      "sequence": 2,
+      "addedDate": 1652086339000
     },
     {
-      "board_id": 1,
-      "post_id": 3,
+      "boardId": 1,
+      "postId": 3,
       "title": "게시글 제목",
       "thumbnail": "게시글 썸네일(base64)",
       "content": "게시글 내용",
-      "sequence": 3
+      "sequence": 3,
+      "addedDate": 1652086339000
     }
   ]
 }
@@ -287,25 +290,25 @@ __한 게시글의 정보를 불러온다. (이미지 포함)__
 ##### Response Body: 
 ```json
 {
-  "post_id": 12345,
-  "board_id": 12345,
+  "postId": 12345,
+  "boardId": 12345,
   "title": "게시글 제목",
   "thumbnail": "게시글 썸네일(base64)",
   "content": "게시글 내용",
   "sequence": 12345,
   "images": [
     {
-      "post_image_id": 1,
+      "postImageId": 1,
       "image": "이미지(base64)",
       "sequence": 1
     },
     {
-      "post_image_id": 2,
+      "postImageId": 2,
       "image": "이미지(base64)",
       "sequence": 2
     },
     {
-      "post_image_id": 3,
+      "postImageId": 3,
       "image": "이미지(base64)",
       "sequence": 3
     }
