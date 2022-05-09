@@ -1,5 +1,6 @@
 package models
 
+import common.encryption.SHA256._
 import dto.AdminDTO
 import javax.inject.Inject
 import models.Tables.{Admin, AdminRow}
@@ -7,11 +8,10 @@ import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import scala.concurrent.{ExecutionContext, Future}
 import slick.jdbc.JdbcProfile
 import slick.jdbc.MySQLProfile.api._
-import common.encryption.SHA256._
 
-class AdminModelImpl @Inject() (val dbConfigProvider: DatabaseConfigProvider)
-							  (implicit ec: ExecutionContext)
-		extends HasDatabaseConfigProvider[JdbcProfile] with AdminModel {
+class AdminModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
+                              (implicit ec: ExecutionContext)
+	extends HasDatabaseConfigProvider[JdbcProfile] with AdminModel {
 	
 	override def insert(admin: AdminDTO): Future[Int] =
 		db run (Admin += AdminRow(
