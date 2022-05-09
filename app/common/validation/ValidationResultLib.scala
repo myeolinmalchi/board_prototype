@@ -1,7 +1,7 @@
 package common.validation
 
 import cats.Monad
-import cats.data.{EitherT, OptionT}
+import cats.data.EitherT
 
 trait ValidationResultLib[M[_]] {
 	
@@ -25,7 +25,7 @@ trait ValidationResultLib[M[_]] {
 		
 		def fromOptionM[F, S](opt: M[Option[S]], ifNone: => F)(implicit m: Monad[M]): ValidationResult[F, S] =
 			EitherT.fromOptionF(opt, ifNone)
-			
+		
 		def apply[F, S](v: M[Either[F, S]])(implicit m: Monad[M]): ValidationResult[F, S] =
 			EitherT.apply(v)
 		
