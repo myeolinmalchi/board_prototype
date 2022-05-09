@@ -152,13 +152,13 @@ __관리자 계정 로그인__
 
 올바르지 않은 요청.
 
+## POST
 
-## Board
-
-### `api/v1/board/{board_id}`
+### `api/v1/post`
 
 #### GET
-__게시판의 게시글을 불러온다.__
+
+__여러 게시물의 정보를 불러온다. (이미지 제외, 썸네일 포함)__
 
 ##### Request Header: 
 ```json
@@ -169,12 +169,17 @@ __게시판의 게시글을 불러온다.__
 ```
 
 ##### Query Parameter: 
-
 - size: 불러올 게시물의 수(default: 24)
-- page: 게시판 페이지(default: 1)
-> ex) https://localhost:9000/api/v1/board/3?size=15&page=3
+- page: 불러올 페이지(default: 1)
+- keyword(Optional) 
+  - keyword가 포함된 제목의 게시글을 검색한다.
+  - 값이 없을 경우 모든 게시글을 불러온다.
+   
+- boardId(Optional)
+  - 해당 게시판의 게시글을 불러온다.
+  - 값이 없을 경우 모든 게시판의 게시글을 불러온다.
 
-##### Response Body:  
+##### Response Body: 
 
 ```json
 {
@@ -208,13 +213,12 @@ __게시판의 게시글을 불러온다.__
   ]
 }
 ```
-<br>
 
 #### POST
 
-__게시판에 게시글을 작성한다.__
+__게시글을 등록한다.__
 
-##### Request Header: 
+##### Request Header:
 ```json
 {
   "Content-Type": "application/json",
@@ -222,7 +226,7 @@ __게시판에 게시글을 작성한다.__
   "Authorization": "JWT"
 }
 ```
-##### Request Body: 
+##### Request Body:
 ```json
 {
   "title": "게시글 제목(200자 미만)",
@@ -236,40 +240,41 @@ __게시판에 게시글을 작성한다.__
   ]
 }
 ```
-
 ##### Response:
 
-###### 201 Created
+###### 200 Ok
 게시글이 정상적으로 등록됨.
 
 ###### 401 Unauthorized
 인가받지 않은 사용자임.
 
 ###### 422 Unprocessable Entity
-입력된 정보가 유효하지 않음.
- - response body: 
+게시글의 제목 또는 내용의 길이가 너무 길 경우.
+- response body:
 ```json
 {
-  "msg": "유효성 검사 결과 메세지"
+  "type": "content 또는 title",
+  "length": "작성한 content 또는 title의 길이",
+  "max": "content 또는 title의 최대 길이"
 }
 ```
 
 ###### 400 Bad Request
 올바르지 않은 요청
-- response body: 
+- response body:
 ```json
 {
   "msg": "에러 메세지"
 }
 ```
 
-## POST
+---
 
 ### `api/v1/post/{post_id}`
 
 #### GET
 
-__게시글의 정보를 불러온다.__
+__한 게시글의 정보를 불러온다. (이미지 포함)__
 
 ##### Request Header:
 ```json
@@ -308,14 +313,24 @@ __게시글의 정보를 불러온다.__
 }
 ```
 
+#### PUT
+
+__게시글의 정보를 수정한다. (순서 제외)__
+
+프론트에서 게시글 수정 로직: 
+- 게시글의 정보를 불러온다.(`GET api/v1/post/{postId}`)
+- 불러온 게시글의 정보를 게시글 에디터 페이지에 띄운다.
+- 에디터에 입력된 모든 정보를 포함하여 서버에 수정 요청을 한다.(`PUT api/v1/post/{postId}`)
+
+이하 `POST api/v1/post`과 동일.
+
 ---
 
-### `api/v1/post/{post_id}/thumbnail`
+### `api/v1/thumbnail`
 
 #### GET
-__게시글의 썸네일을 불러온다.__
 
-##### Request Header:
+##### Request Header: 
 ```json
 {
   "Content-Type": "application/json",
@@ -323,11 +338,35 @@ __게시글의 썸네일을 불러온다.__
 }
 ```
 
-##### Response Body: 
+##### Query Parameter: 
+- size: 불러올 썸네일의 개수(default: 5)
+- boardId(Optional): 
+    - 썸네일을 불러올 게시판
+    - 값이 없을 경우, 모든 게시판에서 썸네일을 불러옴.
+
+##### Response Body:
+
 ```json
-{
-  "post_id": 12345,
-  "board_id": 12345,
-  "thumbnail": "게시글 썸네일(base64)"
-}
+[
+  {
+    "postId": 1,
+    "boardId": 1,
+    "thumbnail": "썸네일 이미지(base64)"
+  },
+  {
+    "postId": 2,
+    "boardId": 1,
+    "thumbnail": "썸네일 이미지(base 64)"
+  },
+  {
+    "postId": 3,
+    "boardId": 2,
+    "thumbnail": "썸네일 이미지(base64)"
+  },
+  {
+    "postId": 4,
+    "boardId": 3,
+    "thumbnail": "썸네일 이미지(base64)"
+  }
+]
 ```
