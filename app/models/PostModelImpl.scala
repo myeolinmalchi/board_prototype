@@ -25,19 +25,18 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 	override def insert(post: PostRequestDTO): Future[Int] = db run {
 		for {
 			lastSeq <- Posts
-				.filter(_.boardId === post.boardId)
 				.map(_.sequence)
 				.max
 				.result
-			postId <- Posts returning Posts.map(_.postId) +=
-				PostsRow(
-					postId = 0,
-					boardId = post.boardId,
-					sequence = lastSeq.getOrElse(0) + 1,
-					title = post.title,
-					content = post.content,
-					thumbnail = post.thumbnail
-				)
+			postId <- Posts.map { post => (
+				post.boardId, post.sequence, post.title, post.content, post.thumbnail
+			)} returning Posts.map(_.postId) += (
+				post.boardId,
+				lastSeq.getOrElse(0) + 1,
+				post.title,
+				post.content,
+				post.thumbnail,
+			)
 			aff <- PostImages ++= post.images.zipWithIndex.map {
 				case (image, index) =>
 					PostImagesRow(postId, 0, image, index + 1)
@@ -64,6 +63,7 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 		Posts
 			.filterOpt(boardId)(_.boardId === _)
 			.filterOpt(keyword)((post, keyword) => post.title like s"%$keyword%")
+			.sorted(_.sequence)
 			.drop((page - 1) * size)
 			.take(size)
 	
@@ -87,6 +87,7 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 		for {
 			posts <- Posts
 				.filterOpt(boardId)(_.boardId === _)
+				.sortBy(_.sequence.desc)
 				.take(size)
 				.result
 		} yield (posts map ThumbnailDTO.rowToDto).toList

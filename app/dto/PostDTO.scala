@@ -1,5 +1,6 @@
 package dto
 
+import java.util.Date
 import models.Tables.{PostImagesRow, Posts}
 import play.api.libs.json.Json
 
@@ -9,10 +10,11 @@ case class PostDTO(postId: Int,
                    thumbnail: String,
                    content: String,
                    sequence: Int,
+                   addedDate: Date,
                    images: List[PostImageDTO] = Nil) {
 	
 	def setImages(images: List[PostImageDTO]): PostDTO =
-		PostDTO(postId, boardId, title, thumbnail, content, sequence, images)
+		PostDTO(postId, boardId, title, thumbnail, content, sequence, addedDate, images)
 	
 }
 
@@ -56,7 +58,8 @@ object PostDTO {
 			row.title,
 			row.thumbnail,
 			row.content,
-			row.sequence
+			row.sequence,
+			row.addedDate
 		)
 }
 
