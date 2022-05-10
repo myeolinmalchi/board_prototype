@@ -29,15 +29,14 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 				.max
 				.result
 			postId <- Posts.map { post =>
-				(
-					post.boardId, post.sequence, post.title, post.content, post.thumbnail
-				)
+				(post.boardId, post.sequence, post.title, post.content, post.thumbnail, post.status)
 			} returning Posts.map(_.postId) += (
 				post.boardId,
 				lastSeq.getOrElse(0) + 1,
 				post.title,
 				post.content,
 				post.thumbnail,
+				post.status
 			)
 			aff <- PostImages ++= post.images.zipWithIndex.map {
 				case (image, index) =>
@@ -69,6 +68,19 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 			.drop((page - 1) * size)
 			.take(size)
 	
+	private val enabledPostsQuery = (size: Int,
+	                                 page: Int,
+	                                 keyword: Option[String],
+	                                 boardId: Option[Int]) =>
+		Posts
+			.filter(_.status)
+			.filterOpt(boardId)(_.boardId === _)
+			.filterOpt(keyword)((post, keyword) => post.title like s"%$keyword%")
+			.sortBy(_.sequence.desc)
+			.drop((page - 1) * size)
+			.take(size)
+	
+	
 	override def selectPosts(size: Int,
 	                         page: Int,
 	                         keyword: Option[String],
@@ -78,16 +90,31 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 		} yield (posts map PostDTO.rowToDto).toList
 	}
 	
+	override def selectEnabledPosts(size: Int,
+	                                page: Int,
+	                                keyword: Option[String],
+	                                boardId: Option[Int]): Future[List[PostDTO]] = db run {
+		for {
+			posts <- enabledPostsQuery(size, page, keyword, boardId).result
+		} yield (posts map PostDTO.rowToDto).toList
+	}
+	
 	override def postCount(size: Int,
 	                       page: Int,
 	                       keyword: Option[String],
 	                       boardId: Option[Int]): Future[Int] =
 		db run postsQuery(size, page, keyword, boardId).size.result
 	
+	override def enabledPostCount(size: Int,
+	                              page: Int,
+	                              keyword: Option[String],
+	                              boardId: Option[Int]): Future[Int] =
+		db run enabledPostsQuery(size, page, keyword, boardId).size.result
 	
 	override def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]] = db run {
 		for {
 			posts <- Posts
+				.filter(_.status)
 				.filterOpt(boardId)(_.boardId === _)
 				.sortBy(_.sequence.desc)
 				.take(size)
@@ -103,8 +130,8 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 		for {
 			aff1 <- Posts
 				.filter(_.postId === postId)
-				.map(p => (p.boardId, p.title, p.content, p.thumbnail))
-				.update((post.boardId, post.title, post.content, post.thumbnail))
+				.map(p => (p.boardId, p.title, p.content, p.thumbnail, p.status))
+				.update((post.boardId, post.title, post.content, post.thumbnail, post.status))
 			aff2 <- PostImages
 				.filter(_.postId === postId)
 				.delete
@@ -144,6 +171,7 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 					case None => go(f(acc))
 				}).flatten
 			}
+		
 		go(f(sequence))
 	}
 	
@@ -203,7 +231,6 @@ class PostModelImpl @Inject()(val dbConfigProvider: DatabaseConfigProvider)
 			)
 		} yield aff
 	}.transactionally
-	
 	
 	override def checkPostExists(postId: Int): Future[Boolean] = db run {
 		for {

@@ -16,10 +16,20 @@ trait PostModel {
 	                keyword: Option[String],
 	                boardId: Option[Int]): Future[List[PostDTO]]
 	
+	def selectEnabledPosts(size: Int,
+	                       page: Int,
+	                       keyword: Option[String],
+	                       board: Option[Int]): Future[List[PostDTO]]
+	
 	def postCount(size: Int,
 	              page: Int,
 	              keyword: Option[String],
 	              boardId: Option[Int]): Future[Int]
+	
+	def enabledPostCount(size: Int,
+	                     page: Int,
+	                     keyword: Option[String],
+	                     boardId: Option[Int]): Future[Int]
 	
 	def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]]
 	
