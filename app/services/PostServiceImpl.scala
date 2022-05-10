@@ -66,6 +66,15 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 			count <- postModel postCount(size, page, keyword, boardId)
 		} yield PostResponseDTO(page, count / size + 1, posts)
 	
+	override def selectEnabledPosts(size: Int,
+	                                page: Int,
+	                                keyword: Option[String],
+	                                boardId: Option[Int]): Future[PostResponseDTO] =
+		for {
+			posts <- postModel selectEnabledPosts(size, page, keyword, boardId)
+			count <- postModel enabledPostCount(size, page, keyword, boardId)
+		} yield PostResponseDTO(page, count / size + 1, posts)
+	
 	override def selectThumbnails(size: Int, boardId: Option[Int]): Future[List[ThumbnailDTO]] =
 		postModel selectThumbnails(size, boardId)
 	
@@ -77,6 +86,5 @@ class PostServiceImpl @Inject()()(implicit ex: ExecutionContext, postModel: Post
 	
 	override def subSequence(postId: Int): Future[Option[Int]] =
 		postModel subSequence postId
-	
 	
 }
