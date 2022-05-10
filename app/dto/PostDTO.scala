@@ -11,10 +11,11 @@ case class PostDTO(postId: Int,
                    content: String,
                    sequence: Int,
                    addedDate: Date,
+                   status: Boolean,
                    images: List[PostImageDTO] = Nil) {
 	
 	def setImages(images: List[PostImageDTO]): PostDTO =
-		PostDTO(postId, boardId, title, thumbnail, content, sequence, addedDate, images)
+		PostDTO(postId, boardId, title, thumbnail, content, sequence, addedDate, status, images)
 	
 }
 
@@ -32,9 +33,10 @@ case class PostRequestDTO(postId: Option[Int],
                           title: String,
                           thumbnail: String,
                           content: String,
+                          status: Boolean,
                           images: List[String]) {
 	def setPostId(postId: Int): PostRequestDTO =
-		PostRequestDTO(Some(postId), boardId, title, thumbnail, content, images)
+		PostRequestDTO(Some(postId), boardId, title, thumbnail, content, status, images)
 }
 
 case class ThumbnailDTO(postId: Int,
@@ -59,7 +61,8 @@ object PostDTO {
 			row.thumbnail,
 			row.content,
 			row.sequence,
-			row.addedDate
+			row.addedDate,
+			row.status
 		)
 }
 
