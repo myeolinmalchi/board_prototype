@@ -9,6 +9,10 @@ trait AuthService {
 	def withAuth(f: => Future[Result])
 	            (implicit request: Request[AnyContent]): Future[Result]
 	
+	def withAuth(authSuccess: => Future[Result],
+	             authFailure: => Future[Result])
+	            (implicit request: Request[AnyContent]): Future[Result]
+	
 }
 
 object AuthService {

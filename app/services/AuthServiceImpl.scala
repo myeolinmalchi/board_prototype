@@ -1,22 +1,20 @@
 package services
 
 import cats.data.OptionT
-import common.authorization.AdminAuth
+import common.authorization.AdminAuth._
 import common.validation.ValidationResultLib
 import javax.inject.Inject
 import models.AdminModel
 import pdi.jwt.{JwtClaim, JwtJson}
-import play.api.mvc.{AnyContent, Request, Result}
-import scala.concurrent.{ExecutionContext, Future}
-import services.AuthService._
-import common.authorization.AdminAuth._
-import dto.AdminDTO
 import play.api.libs.json.Json
 import play.api.mvc.Results.{Forbidden, NotFound, Unauthorized}
+import play.api.mvc.{AnyContent, Request, Result}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
+import services.AuthService._
 
-class AuthServiceImpl @Inject() () (implicit ec: ExecutionContext, adminModel: AdminModel)
-	extends AuthService with ValidationResultLib[Future]{
+class AuthServiceImpl @Inject()()(implicit ec: ExecutionContext, adminModel: AdminModel)
+	extends AuthService with ValidationResultLib[Future] {
 	
 	case class AdminAuth()(implicit request: Request[AnyContent]) {
 		private def checkTokenValid(token: String): ValidationResult[AuthFailure, Unit] =
@@ -24,22 +22,22 @@ class AuthServiceImpl @Inject() () (implicit ec: ExecutionContext, adminModel: A
 				JwtJson.isValid(token, key, Seq(algo)),
 				onFailure = InvalidToken
 			)
-			
+		
 		private def checkTokenNotExpired(claims: JwtClaim): ValidationResult[AuthFailure, Unit] =
 			ValidationResult.ensure(
 				claims.expiration.getOrElse(0L) > System.currentTimeMillis() / 1000,
 				onFailure = ExpiredToken
 			)
-			
-		private def checkRole(role :String): ValidationResult[AuthFailure, Unit] =
+		
+		private def checkRole(role: String): ValidationResult[AuthFailure, Unit] =
 			ValidationResult.ensure(role.equals(ROLE_ADMIN), onFailure = IncorrectAuth)
-			
+		
 		private def checkAccountExist(id: String): ValidationResult[AuthFailure, Unit] =
 			ValidationResult.ensureM(
 				adminModel.checkAccountExists(id),
 				onFailure = NotExistID
 			)
-			
+		
 		private def getJsonContent(claims: JwtClaim): (String, String) = {
 			val json = Json.parse(claims.content)
 			val role = (json \ "role").as[String]
@@ -72,9 +70,21 @@ class AuthServiceImpl @Inject() () (implicit ec: ExecutionContext, adminModel: A
 				case Left(NotExistID) => Future(NotFound)
 				case Left(NoToken) => Future(Unauthorized)
 			}
+		
+		def auth(authSuccess: => Future[Result],
+		         authFailure: => Future[Result]): Future[Result] =
+			validation flatMap {
+				case Right(_) => authSuccess
+				case Left(_) => authFailure
+			}
 	}
 	
-	override def withAuth(f: => Future[Result])(implicit request: Request[AnyContent]): Future[Result] =
-		AdminAuth().auth(f)
+	override def withAuth(authSuccess: => Future[Result])
+	                     (implicit request: Request[AnyContent]): Future[Result] =
+		AdminAuth().auth(authSuccess)
+	
+	override def withAuth(authSuccess: => Future[Result], authFailure: => Future[Result])
+	                     (implicit request: Request[AnyContent]): Future[Result] =
+		AdminAuth().auth(authSuccess, authFailure)
 	
 }
