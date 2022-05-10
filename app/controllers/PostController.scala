@@ -5,7 +5,7 @@ import dto.PostRequestDTO
 import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import services.{AuthService, PostService}
 import services.PostService._
 
@@ -63,17 +63,32 @@ class PostController @Inject()(cc: ControllerComponents,
 	             page: Option[Int],
 	             keyword: Option[String],
 	             boardId: Option[Int]): Action[AnyContent] = Action.async { implicit request =>
-		postService selectPosts(
-			size = size.getOrElse(15),
-			page = page.getOrElse(1),
-			keyword = keyword,
-			boardId = boardId
-		) map { post =>
-			Ok(Json.toJson(post))
-		} recover {
-			case ex: Exception =>
-				BadRequest(Json.obj("msg" -> ex.getMessage))
-		}
+		withAuth(
+			authSuccess =
+				postService selectPosts(
+					 size = size.getOrElse(15),
+					 page = page.getOrElse(1),
+					 keyword = keyword,
+					 boardId = boardId
+				 ) map { post =>
+					Ok(Json.toJson(post))
+				} recover {
+					case ex: Exception =>
+						BadRequest(Json.obj("msg" -> ex.getMessage))
+				},
+			authFailure =
+				postService selectEnabledPosts(
+					size = size.getOrElse(15),
+					page = page.getOrElse(1),
+					keyword = keyword,
+					boardId = boardId
+				) map { post =>
+					Ok(Json.toJson(post))
+				} recover {
+					case ex: Exception =>
+						BadRequest(Json.obj("msg" -> ex.getMessage))
+				}
+		)
 	}
 	
 	def getThumbnails(size: Option[Int], boardId: Option[Int]): Action[AnyContent] = Action.async { implicit request =>
