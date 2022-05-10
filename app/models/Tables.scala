@@ -112,18 +112,19 @@ trait Tables {
    *  @param thumbnail Database column thumbnail SqlType(LONGTEXT), Length(2147483647,true)
    *  @param content Database column content SqlType(VARCHAR), Length(2000,true), Default()
    *  @param sequence Database column sequence SqlType(INT)
-   *  @param addedDate Database column added_date SqlType(TIMESTAMP) */
-  case class PostsRow(postId: Int, boardId: Int, title: String, thumbnail: String, content: String = "", sequence: Int, addedDate: java.sql.Timestamp)
+   *  @param addedDate Database column added_date SqlType(TIMESTAMP)
+   *  @param status Database column status SqlType(BIT), Default(false) */
+  case class PostsRow(postId: Int, boardId: Int, title: String, thumbnail: String, content: String = "", sequence: Int, addedDate: java.sql.Timestamp, status: Boolean = false)
   /** GetResult implicit for fetching PostsRow objects using plain SQL queries */
-  implicit def GetResultPostsRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp]): GR[PostsRow] = GR{
+  implicit def GetResultPostsRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp], e3: GR[Boolean]): GR[PostsRow] = GR{
     prs => import prs._
-    PostsRow.tupled((<<[Int], <<[Int], <<[String], <<[String], <<[String], <<[Int], <<[java.sql.Timestamp]))
+    PostsRow.tupled((<<[Int], <<[Int], <<[String], <<[String], <<[String], <<[Int], <<[java.sql.Timestamp], <<[Boolean]))
   }
   /** Table description of table posts. Objects of this class serve as prototypes for rows in queries. */
   class Posts(_tableTag: Tag) extends profile.api.Table[PostsRow](_tableTag, Some("board_prototype"), "posts") {
-    def * = (postId, boardId, title, thumbnail, content, sequence, addedDate) <> (PostsRow.tupled, PostsRow.unapply)
+    def * = (postId, boardId, title, thumbnail, content, sequence, addedDate, status) <> (PostsRow.tupled, PostsRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = ((Rep.Some(postId), Rep.Some(boardId), Rep.Some(title), Rep.Some(thumbnail), Rep.Some(content), Rep.Some(sequence), Rep.Some(addedDate))).shaped.<>({r=>import r._; _1.map(_=> PostsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = ((Rep.Some(postId), Rep.Some(boardId), Rep.Some(title), Rep.Some(thumbnail), Rep.Some(content), Rep.Some(sequence), Rep.Some(addedDate), Rep.Some(status))).shaped.<>({r=>import r._; _1.map(_=> PostsRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column post_id SqlType(INT), AutoInc, PrimaryKey */
     val postId: Rep[Int] = column[Int]("post_id", O.AutoInc, O.PrimaryKey)
@@ -139,6 +140,8 @@ trait Tables {
     val sequence: Rep[Int] = column[Int]("sequence")
     /** Database column added_date SqlType(TIMESTAMP) */
     val addedDate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("added_date")
+    /** Database column status SqlType(BIT), Default(false) */
+    val status: Rep[Boolean] = column[Boolean]("status", O.Default(false))
 
     /** Foreign key referencing Boards (database name FK_posts_boards) */
     lazy val boardsFk = foreignKey("FK_posts_boards", boardId, Boards)(r => r.boardId, onUpdate=ForeignKeyAction.Cascade, onDelete=ForeignKeyAction.Cascade)
